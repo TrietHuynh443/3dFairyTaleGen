@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -51,9 +52,21 @@ namespace Network
     {
         [SerializeField] private string _baseUrl = "http://localhost";
         [SerializeField] private int _port = 8080;
-        
-        public string Url => $"{_baseUrl}/{_port}";
-        
+        private string[] _paragraphs;
+        private Dictionary<string, string[]> _paragraphDict = new Dictionary<string, string[]>();
+        public string Url => $"{_baseUrl}:{_port}";
+
+        public async UniTask<string[]> GetParagraphs(string story, string title)
+        {
+            if (_paragraphDict.TryGetValue(title, out var paragraphs))
+            {
+                return paragraphs;
+            }
+            var jsonRaw = await NetworkHelper.DoGet($"{Url}/split-story?story={story}");
+            _paragraphs = NetworkHelper.DoParseJson<string[]>(jsonRaw);
+            _paragraphDict.Add(title, _paragraphs);
+            return _paragraphs;
+        }
     }
 
 }
