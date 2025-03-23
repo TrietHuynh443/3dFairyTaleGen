@@ -11,5 +11,10 @@ namespace EventProcessing
     {
         
     }
+
+    public class OnChangeParagraphEvent : IEvent
+    {
+        public bool IsNext { get; set; } = true;
+    }
     
 }

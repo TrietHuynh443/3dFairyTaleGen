@@ -1,4 +1,6 @@
+using System;
 using Cinemachine;
+using EventProcessing;
 using UnityEngine;
 
 public class AudioPlayer : MonoBehaviour
@@ -14,6 +16,11 @@ public class AudioPlayer : MonoBehaviour
         _vcam = GetComponent<CinemachineVirtualCamera>();
     }
 
+    public void ForcePlay()
+    {
+        _forcedPlay = true;
+    }
+
     // Update is called once per frame
     private void Update()
     {
@@ -24,8 +31,10 @@ public class AudioPlayer : MonoBehaviour
         {
             if (!_audio.isPlaying && !_isPlay || _forcedPlay)
             {
+                _audio.Stop();
                 _isPlay = true;
                 _audio.Play();
+                _forcedPlay = false;
             }
         }
         else

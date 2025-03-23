@@ -8,7 +8,7 @@ using Network;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class InitialLoader : MonoBehaviour
+public class InitialLoader : UnitySingleton<InitialLoader>
 {
     [SerializeField] private GameObject _image360HolderPrefab;
     [SerializeField] private NetworkManager _networkManager;
@@ -19,9 +19,11 @@ public class InitialLoader : MonoBehaviour
     };
     
     public static bool IsInitialized { get; private set; } = false;
+    public static int CurrentScene;
     
     private List<GameObject> _image360Holders = new List<GameObject>();
-    
+    public static int MaxScene = 0;
+
     private async void Awake()
     {
         var story =
@@ -50,12 +52,45 @@ public class InitialLoader : MonoBehaviour
             _image360Holders.Add(holder);
             LoadAllModelGen(holder, _initialData.storyName, i);
         }
+        MaxScene = textures.Length - 1;
 
         EventAggregator.Instance.RaiseEvent(new InitialLoadingFinish());
         IsInitialized = true;
     }
-    
-    
+
+    private void OnEnable()
+    {
+        EventAggregator.Instance.AddEventListener<OnChangeParagraphEvent>(LoadParagraph);
+    }
+
+    private void OnDisable()
+    {
+        EventAggregator.Instance?.RemoveEventListener<OnChangeParagraphEvent>(LoadParagraph);
+    }
+
+    private void LoadParagraph(OnChangeParagraphEvent obj)
+    {
+        CinemachineVirtualCamera cam;
+        cam = _image360Holders[CurrentScene].GetComponentInChildren<CinemachineVirtualCamera>();
+        if (obj.IsNext && CurrentScene < MaxScene)
+        {
+            ++CurrentScene;
+        }
+        else if(!obj.IsNext && CurrentScene > 0)
+        {
+            --CurrentScene;
+        }
+        else
+        {
+            return;
+        }
+        cam.Priority = int.MinValue;
+        cam = _image360Holders[CurrentScene].GetComponentInChildren<CinemachineVirtualCamera>();
+        var audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<AudioPlayer>();
+        audioPlayer.ForcePlay();
+        cam.Priority = int.MaxValue;
+    }
+
 
     private void LoadAllModelGen(GameObject parent, string initialDataStoryName, int i)
     {
