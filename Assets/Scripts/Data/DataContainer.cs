@@ -12,7 +12,7 @@ public class DataContainer
     public string[] paragraphs { get; set; }
     
     [JsonIgnore]
-    public Texture2D[] images360 => Resources.LoadAll<Texture2D>(storyName);
+    public Texture2D[] images360 => Resources.LoadAll<Texture2D>($"{storyName}/Image360");
     public List<AudioClip> storyAudios { get; set; }
     public List<AudioClip> characterSounds { get; set; }
 }
