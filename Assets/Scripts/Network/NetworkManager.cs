@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -41,7 +43,37 @@ namespace Network
                 throw new System.Exception(request.error);
             }
         }
-    
+
+
+        public static async UniTask<MemoryStream> DoGetStreaming(string fullUrl)
+        {
+            using var request = UnityWebRequest.Get(fullUrl);
+            request.downloadHandler = new DownloadHandlerBuffer(); // Efficient memory handling
+
+            await request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success || request.downloadHandler.data == null)
+            {
+                throw new System.Exception(request.error);
+            }
+
+            return new MemoryStream(request.downloadHandler.data, writable: false);
+        }
+        
+        public static async UniTask<AudioClip> DoDownloadAudioClip(string url, AudioType audioType)
+        {
+            using var request = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
+            await request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception($"Audio download failed: {request.error}");
+            }
+
+            return DownloadHandlerAudioClip.GetContent(request);
+        }
+
+        
         public static T DoParseJson<T>(string json) where T : class
         {
             return JsonConvert.DeserializeObject<T>(json);
@@ -66,6 +98,23 @@ namespace Network
             _paragraphs = NetworkHelper.DoParseJson<string[]>(jsonRaw);
             _paragraphDict.Add(title, _paragraphs);
             return _paragraphs;
+        }
+
+        public async UniTask<AudioClip[]> GetAudioClip(string story, string title)
+        {
+            
+            if (_paragraphDict.TryGetValue(title, out var paragraphs))
+            {
+                _paragraphs = paragraphs;
+            }
+            _paragraphs = await GetParagraphs(story, title);
+            AudioClip[] audioClips = new AudioClip[_paragraphs.Length];
+            for (int i = 0; i < _paragraphs.Length; i++)
+            {
+                AudioClip audioClip = await NetworkHelper.DoDownloadAudioClip($"{Url}/stream-audio?text={_paragraphs[i]}", AudioType.WAV);
+                audioClips[i] = audioClip;
+            }
+            return audioClips;
         }
     }
 
