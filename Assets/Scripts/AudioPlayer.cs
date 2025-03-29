@@ -3,43 +3,46 @@ using Cinemachine;
 using EventProcessing;
 using UnityEngine;
 
-public class AudioPlayer : MonoBehaviour
+namespace SceneEnity
 {
-    [SerializeField] private AudioSource _audio;
-
-    private CinemachineVirtualCamera _vcam;
-    private bool _isPlay = false;
-    private bool _forcedPlay = false;
-
-    private void Start()
+    public class AudioPlayer : MonoBehaviour
     {
-        _vcam = GetComponent<CinemachineVirtualCamera>();
-    }
+        [SerializeField] private AudioSource _audio;
 
-    public void ForcePlay()
-    {
-        _forcedPlay = true;
-    }
+        private CinemachineVirtualCamera _vcam;
+        private bool _isPlay = false;
+        private bool _forcedPlay = false;
 
-    // Update is called once per frame
-    private void Update()
-    {
-        if (!InitialLoader.IsInitialized)
-            return;
-        // Check if this virtual camera is the active one
-        if (_vcam != null && CinemachineCore.Instance.IsLive(_vcam))
+        private void Start()
         {
-            if (!_audio.isPlaying && !_isPlay || _forcedPlay)
+            _vcam = GetComponent<CinemachineVirtualCamera>();
+        }
+
+        public void ForcePlay()
+        {
+            _forcedPlay = true;
+        }
+
+        // Update is called once per frame
+        private void Update()
+        {
+            if (!InitialLoader.IsInitialized)
+                return;
+            // Check if this virtual camera is the active one
+            if (_vcam != null && CinemachineCore.Instance.IsLive(_vcam))
+            {
+                if (!_audio.isPlaying && !_isPlay || _forcedPlay)
+                {
+                    _audio.Stop();
+                    _isPlay = true;
+                    _audio.Play();
+                    _forcedPlay = false;
+                }
+            }
+            else
             {
                 _audio.Stop();
-                _isPlay = true;
-                _audio.Play();
-                _forcedPlay = false;
             }
-        }
-        else
-        {
-            _audio.Stop();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using SO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -84,6 +85,7 @@ namespace Network
     {
         [SerializeField] private string _baseUrl = "http://localhost";
         [SerializeField] private int _port = 8080;
+        [SerializeField] private EnvironmentSO _config;
         private string[] _paragraphs;
         private Dictionary<string, string[]> _paragraphDict = new Dictionary<string, string[]>();
         public string Url => $"{_baseUrl}:{_port}";
@@ -102,13 +104,19 @@ namespace Network
 
         public async UniTask<AudioClip[]> GetAudioClip(string story, string title)
         {
-            
+            AudioClip[] audioClips;
+
+            if (_config != null && _config.environmentType == EnvironmentType.Local)
+            {
+                audioClips = Resources.LoadAll<AudioClip>($"{story}/audios");
+                return audioClips;
+            }
             if (_paragraphDict.TryGetValue(title, out var paragraphs))
             {
                 _paragraphs = paragraphs;
             }
+            audioClips = new AudioClip[_paragraphs.Length];
             _paragraphs = await GetParagraphs(story, title);
-            AudioClip[] audioClips = new AudioClip[_paragraphs.Length];
             for (int i = 0; i < _paragraphs.Length; i++)
             {
                 AudioClip audioClip = await NetworkHelper.DoDownloadAudioClip($"{Url}/stream-audio?text={_paragraphs[i]}", AudioType.WAV);
