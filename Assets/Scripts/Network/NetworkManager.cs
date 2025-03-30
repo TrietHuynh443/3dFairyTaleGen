@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using SO;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace Network
 {
@@ -81,6 +84,7 @@ namespace Network
         }
     }
     
+
     public class NetworkManager : MonoBehaviour
     {
         [SerializeField] private string _baseUrl = "http://localhost";
@@ -88,6 +92,8 @@ namespace Network
         [SerializeField] private EnvironmentSO _config;
         private string[] _paragraphs;
         private Dictionary<string, string[]> _paragraphDict = new Dictionary<string, string[]>();
+        
+        private static Stopwatch _timer;
         public string Url => $"{_baseUrl}:{_port}";
 
         public async UniTask<string[]> GetParagraphs(string story, string title)
@@ -104,26 +110,52 @@ namespace Network
 
         public async UniTask<AudioClip[]> GetAudioClip(string story, string title)
         {
+            _timer = Stopwatch.StartNew();
             AudioClip[] audioClips;
 
             if (_config != null && _config.environmentType == EnvironmentType.Local)
             {
-                audioClips = Resources.LoadAll<AudioClip>($"{story}/audios");
+                audioClips = Resources.LoadAll<AudioClip>($"{title}/Audio");
                 return audioClips;
             }
             if (_paragraphDict.TryGetValue(title, out var paragraphs))
             {
                 _paragraphs = paragraphs;
             }
-            audioClips = new AudioClip[_paragraphs.Length];
+            
             _paragraphs = await GetParagraphs(story, title);
+            audioClips = new AudioClip[_paragraphs.Length];
+
             for (int i = 0; i < _paragraphs.Length; i++)
             {
                 AudioClip audioClip = await NetworkHelper.DoDownloadAudioClip($"{Url}/stream-audio?text={_paragraphs[i]}", AudioType.WAV);
                 audioClips[i] = audioClip;
+#if UNITY_EDITOR
+                // Ensure the directory exists
+                var savePath = Path.Combine(Application.dataPath, "Resources", title, "Audio");
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
+                // Convert AudioClip to WAV and save in Resources
+                string filePath = Path.Combine(savePath, $"{i}.wav");
+                SaveAudioClip(audioClip, filePath);
+#endif
             }
+
+            Debug.Log("Loaded Audio elapsed time " + _timer.Elapsed.TotalSeconds + " seconds");
             return audioClips;
         }
+        
+#if UNITY_EDITOR
+        private void SaveAudioClip(AudioClip clip, string path)
+        {
+            byte[] wavData = WavUtility.ToWav(clip); // Convert AudioClip to WAV bytes (you need a WavUtility class)
+            File.WriteAllBytes(path, wavData);
+            AssetDatabase.Refresh(); // Refresh Unity Editor to recognize the new file
+            Debug.Log($"Saved audio: {path}");
+        }
+#endif
     }
-
 }
