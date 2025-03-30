@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using SO;
@@ -108,7 +109,7 @@ namespace Network
             return _paragraphs;
         }
 
-        public async UniTask<AudioClip[]> GetAudioClip(string story, string title)
+        public async UniTask<AudioClip[]> GetAudioClips(string story, string title)
         {
             _timer = Stopwatch.StartNew();
             AudioClip[] audioClips;
@@ -143,11 +144,15 @@ namespace Network
                 SaveAudioClip(audioClip, filePath);
 #endif
             }
-
+            _timer.Stop();
             Debug.Log("Loaded Audio elapsed time " + _timer.Elapsed.TotalSeconds + " seconds");
             return audioClips;
         }
-        
+
+        public async UniTask<AudioClip> GetAudioClip(string text, string language)
+        {
+            return await NetworkHelper.DoDownloadAudioClip($"{Url}/stream-audio?text={text}", AudioType.WAV);
+        }
 #if UNITY_EDITOR
         private void SaveAudioClip(AudioClip clip, string path)
         {
@@ -157,5 +162,17 @@ namespace Network
             Debug.Log($"Saved audio: {path}");
         }
 #endif
+        //language is 'en' or 'vi' depend on paragraph language
+        public async UniTask<string[]> GetCharacterDialogues(string paragraph, string characterName, string language = "en")
+        {
+            Dictionary<string, string> request = new()
+            {
+                { "paragraph", paragraph },
+                { "character", characterName },
+                { "language", language }
+            };
+            var res = await NetworkHelper.DoPost($"{Url}/characters-audio-paragraph", Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request)));
+            return JsonConvert.DeserializeObject<string[]>(res);
+        }
     }
 }
