@@ -14,6 +14,12 @@ namespace SceneEnity
 
         public void ForcePlay()
         {
+            StartCoroutine(DelayPlay());
+        }
+
+        private IEnumerator DelayPlay()
+        {
+            yield return new WaitForSeconds(1.5f);
             _audio.Play();
         }
 

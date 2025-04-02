@@ -68,16 +68,10 @@ public class InitialLoader : UnitySingleton<InitialLoader>
 
         EventAggregator.Instance.RaiseEvent(new InitialLoadingFinish());
         IsInitialized = true;
-        StartCoroutine(PlayFirstAudio());
-    }
-
-    private IEnumerator PlayFirstAudio()
-    {
-        yield return new WaitForSeconds(1.5f);
         var audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
         audioPlayer.ForcePlay();
     }
-
+    
     private void OnEnable()
     {
         EventAggregator.Instance.AddEventListener<OnChangeParagraphEvent>(LoadParagraph);
@@ -134,6 +128,9 @@ public class InitialLoader : UnitySingleton<InitialLoader>
         foreach (var obj in objects)
         {
             var instance = Instantiate(obj, parent.transform, true);
+            var collider = instance.AddComponent<BoxCollider>();
+            collider.isTrigger = true;
+            collider.size *= 0.7f;
             SetCharacterPosition(instance);
             instance.transform.localRotation = Quaternion.identity;
             instance.transform.localScale = 0.3f * Vector3.one;
