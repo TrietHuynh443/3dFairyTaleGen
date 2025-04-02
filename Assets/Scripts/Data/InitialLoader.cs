@@ -68,6 +68,14 @@ public class InitialLoader : UnitySingleton<InitialLoader>
 
         EventAggregator.Instance.RaiseEvent(new InitialLoadingFinish());
         IsInitialized = true;
+        StartCoroutine(PlayFirstAudio());
+    }
+
+    private IEnumerator PlayFirstAudio()
+    {
+        yield return new WaitForSeconds(1.5f);
+        var audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
+        audioPlayer.ForcePlay();
     }
 
     private void OnEnable()
@@ -85,6 +93,8 @@ public class InitialLoader : UnitySingleton<InitialLoader>
         SetEnableController(true);
         CinemachineVirtualCamera cam;
         cam = _image360Holders[CurrentScene].GetComponentInChildren<CinemachineVirtualCamera>();
+        var audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
+        audioPlayer.ForcedStop();
         if (obj.IsNext && CurrentScene < MaxScene)
         {
             ++CurrentScene;
@@ -97,9 +107,9 @@ public class InitialLoader : UnitySingleton<InitialLoader>
         {
             return;
         }
-
+        
         cam = _image360Holders[CurrentScene].GetComponentInChildren<CinemachineVirtualCamera>();
-        var audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
+        audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
         audioPlayer.ForcePlay();
         transform.DOMove(cam.transform.position, 2f).OnComplete(() =>
         {
