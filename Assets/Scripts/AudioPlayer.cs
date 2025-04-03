@@ -8,19 +8,23 @@ namespace SceneEnity
 {
     public class AudioPlayer : MonoBehaviour
     {
+        static AudioSource _instance;
         [SerializeField] private AudioSource _audio;
         public bool IsPlaying => _audio.isPlaying;
-
-
+        
         public void ForcePlay()
         {
+            _instance = _audio;
             StartCoroutine(DelayPlay());
         }
 
         private IEnumerator DelayPlay()
         {
-            yield return new WaitForSeconds(1.5f);
-            _audio.Play();
+            yield return new WaitForSeconds(3.5f);
+            if (_instance == _audio)
+            {
+                _audio.Play();
+            }
         }
 
         public void ForcedStop()
