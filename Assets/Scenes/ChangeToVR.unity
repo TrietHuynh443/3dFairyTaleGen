@@ -573,6 +573,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _image360HolderPrefab: {fileID: 7179712793868498804, guid: 74ac610ac4dcd6f4ca3790cc4cb95165, type: 3}
   _networkManager: {fileID: 1996774440}
+  _environmentSO: {fileID: 0}
+--- !u!135 &361790473
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42286043}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 4
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &368102255 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1717163970118282201, guid: 299462d86031dbc4abd1c2783f912439, type: 3}
@@ -836,7 +858,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1717163969333790867, guid: 299462d86031dbc4abd1c2783f912439, type: 3}
       propertyPath: m_text
-      value: 'Page: 0'
+      value: 'Page: 1.0'
       objectReference: {fileID: 0}
     - target: {fileID: 1717163969607983815, guid: 299462d86031dbc4abd1c2783f912439, type: 3}
       propertyPath: m_IsActive
@@ -3111,6 +3133,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100008, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 361790472}
+    - targetCorrespondingSourceObject: {fileID: 100008, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 361790473}
   m_SourcePrefab: {fileID: 100100000, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
 --- !u!1 &1776492049
 GameObject:
