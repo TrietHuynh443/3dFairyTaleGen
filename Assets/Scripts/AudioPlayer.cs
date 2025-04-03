@@ -9,8 +9,8 @@ namespace SceneEnity
     public class AudioPlayer : MonoBehaviour
     {
         [SerializeField] private AudioSource _audio;
+        public bool IsPlaying => _audio.isPlaying;
 
-  
 
         public void ForcePlay()
         {
@@ -28,5 +28,9 @@ namespace SceneEnity
             _audio.Stop();
         }
 
+        public void ImmediatePlay()
+        {
+            _audio.Play();
+        }
     }
 }
