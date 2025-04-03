@@ -25,14 +25,19 @@ public class InitialLoader : UnitySingleton<InitialLoader>
     private List<GameObject> _image360Holders = new List<GameObject>();
     private OVRPlayerController _playerController;
     private CharacterController _characterController;
-    private CinemachineBrain _cinemachineBrain;
+
+    private OVRVignette _vignette;
+
+
+
     public static int MaxScene = 0;
 
     protected override void SingletonAwake()
     {
         _playerController = GetComponent<OVRPlayerController>();
         _characterController = GetComponent<CharacterController>();
-        _cinemachineBrain = GetComponent<CinemachineBrain>();
+        Transform canvasTransform = GameObject.Find("CenterEyeAnchor").transform;
+        _vignette = canvasTransform.GetComponent<OVRVignette>();
     }
 
     private async void Start()
@@ -71,7 +76,7 @@ public class InitialLoader : UnitySingleton<InitialLoader>
         var audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
         audioPlayer.ForcePlay();
     }
-    
+
     private void OnEnable()
     {
         EventAggregator.Instance.AddEventListener<OnChangeParagraphEvent>(LoadParagraph);
@@ -101,16 +106,32 @@ public class InitialLoader : UnitySingleton<InitialLoader>
         {
             return;
         }
-        
         cam = _image360Holders[CurrentScene].GetComponentInChildren<CinemachineVirtualCamera>();
         audioPlayer = _image360Holders[CurrentScene].GetComponentInChildren<SceneEnity.AudioPlayer>();
         audioPlayer.ForcePlay();
+        SetVignetteFov();
+        StartCoroutine(DelayMove(cam));
+    }
+
+    // Change the Vignette Field of View to 0 in 1 second
+    private void SetVignetteFov()
+    {
+        ;
+        DOTween.To(() => _vignette.VignetteFieldOfView, x => _vignette.VignetteFieldOfView = x, -10f, 1f);
+    }
+
+    private IEnumerator DelayMove(CinemachineVirtualCamera cam)
+    {
+        yield return new WaitForSeconds(1.5f);
         transform.DOMove(cam.transform.position, 2f).OnComplete(() =>
         {
-            Debug.Log("Blend finished");
+            DOTween.To(() => _vignette.VignetteFieldOfView, x => _vignette.VignetteFieldOfView = x, 180f, 1f);
             SetEnableController(false); // Re-enable player control after blend
         });
     }
+
+
+    // Delay 1 second and then set the Vignette Field of View to 0
     private void SetEnableController(bool isActive)
     {
         _characterController.enabled = !isActive;
@@ -142,7 +163,7 @@ public class InitialLoader : UnitySingleton<InitialLoader>
     {
         float randomX = Mathf.Round(Random.Range(-0.3f, 0.3f) / 0.05f) * 0.05f;
         float randomZ = Mathf.Round(Random.Range(-0.3f, 0.3f) / 0.05f) * 0.05f;
-    
+
         instance.transform.localPosition = new Vector3(randomX, 0f, randomZ);
     }
 }
