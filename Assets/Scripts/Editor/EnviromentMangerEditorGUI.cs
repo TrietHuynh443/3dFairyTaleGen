@@ -33,7 +33,7 @@ public class EnvironmentManagerEditorGUI : EditorWindow
         if (_environmentConfig != null)
         {
             _environmentConfig.environmentType = (EnvironmentType)EditorGUILayout.EnumPopup("Environment Type", _environmentConfig.environmentType);
-
+            _environmentConfig.environmentLevel = (EnvironmentLevel)EditorGUILayout.EnumPopup("Environment Level", _environmentConfig.environmentLevel);
             if (GUILayout.Button("Save"))
             {
                 EditorUtility.SetDirty(_environmentConfig);
