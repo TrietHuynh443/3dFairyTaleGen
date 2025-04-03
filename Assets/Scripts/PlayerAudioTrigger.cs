@@ -37,18 +37,12 @@ public class PlayerAudioTrigger : MonoBehaviour
             return;
         }
         Debug.Log(collision.gameObject.name + " triggered");
-        if (!_currentAudioSource)
+        if (!_currentAudioSource || _currentAudioSource.clip == null || !_currentAudioSource.isPlaying)
         {
             _currentAudioSource = collision.gameObject.GetComponent<AudioSource>();
         }
-
-        if (!_currentAudioSource.isPlaying)
-        {
-            Debug.Log(collision.gameObject.name + " triggered");
-            _currentAudioSource.Play();
-        }
-
-
-
+        if (_currentAudioSource.isPlaying)
+            return;
+        _currentAudioSource.Play();
     }
 }
